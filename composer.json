@@ -1,5 +1,5 @@
 {
-    "name": "margotruppert/chocoblast",
+    "name": "maximecloarec/chocoblast",
     "description": "Projet de cours sur le théme chocoblast",
     "type": "project",
     "license": "MIT",
@@ -10,8 +10,8 @@
     },
     "authors": [
         {
-            "name": "margotruppert",
-            "email": "margot.ruppert@gmail.com"
+            "name": "maxime",
+            "email": "franchementJeSaisPas@adrar-formation.com"
         }
     ],
     "minimum-stability": "dev",

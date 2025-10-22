@@ -2,44 +2,33 @@
 
 namespace App\Repository;
 
-<<<<<<< HEAD
+use App\Entity\Entity;
 use App\Entity\EntityInterface;
 use App\Repository\AbstractRepository;
 use App\Entity\User;
 
+
 class UserRepository extends AbstractRepository
 {
-    //constructeur
+    //Constructeur
     public function __construct()
     {
         $this->setConnexion();
-=======
-use App\Database\MySQL;
-use App\Entity\User;
-
-class UserRepository
-{
-    private \PDO $connexion;
-
-    //constructeur
-    public function __construct()
-    {
-        $this->connexion = (new MySQL())->connectBdd();
->>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
     }
 
-    //ajouter un utilisateur
+    /**
+     * Méthode pour enregistrer un User en BDD
+     * @param User $user (Objet User à ajouter en BDD)
+     * @return void ne retourne rien
+     */
     public function saveUser(User $user): void
     {
-<<<<<<< HEAD
-        $request = "INSERT INTO users(firstname, lastname, email, pseudo, password, img_profile, grants, `status`)
-=======
-        $request = "INSERT INTO users(firstname, lastname, email, pseudo, `password`, img_profil, grants, `status`)
->>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
-        VALUE(?,?,?,?,?,?,?,?)";
-
+        //1 écrire la requête SQL
+        $request = "INSERT INTO users(firstname, lastname, email, pseudo, `password`, img_profile, grants, `status`)
+        VALUE (?,?,?,?,?,?,?,?)";
+        //2 préparation de la requête
         $req = $this->connexion->prepare($request);
-
+        //3 assigner les paramètres
         $req->bindValue(1, $user->getFirstname(), \PDO::PARAM_STR);
         $req->bindValue(2, $user->getLastname(), \PDO::PARAM_STR);
         $req->bindValue(3, $user->getEmail(), \PDO::PARAM_STR);
@@ -48,41 +37,99 @@ class UserRepository
         $req->bindValue(6, $user->getImgProfil(), \PDO::PARAM_STR);
         $req->bindValue(7, implode(",", $user->getGrants()), \PDO::PARAM_STR);
         $req->bindValue(8, $user->getStatus(), \PDO::PARAM_BOOL);
-    
+        //4 exécuter la requête
         $req->execute();
-    
-    }
-    //afficher un utilisateur
-<<<<<<< HEAD
-    public function find(int $id): ?EntityInterface{
-        $sql = "SELECT firstname, lastname, email, pseudo,password, img_profile, grants, `status` FROM users WHERE id = ?";
-        $req = $this->connexion->prepare($sql);
-
-        $req->bindValue(1,$id, \PDO::PARAM_INT);
-        $req->execute();
-
-        $user = $req->fetch(\PDO::FETCH_ASSOC);
-
-        return new USER($user["firstname"], $user["lastname"], $user["email"], $user["password"]);
     }
 
-    //afficher tous les utilisateurs
-        public function findAll(): array{
-        $sql = "SELECT firstname, lastname, email, pseudo,`password`, img_profile, grants, `status` FROM users";
-        $req = $this->connexion->prepare($sql);
-
+    /**
+     * Méthode pour rechercher un User avec son id
+     * @param int $id id du User à chercher en BDD
+     * @return Entity|null retourne un Objet User(Entity) ou null
+     */
+    public function findV2(int $id): ?EntityInterface
+    {
+        $request = "SELECT id, firstname, lastname, email, pseudo, img_profile AS imgProfil, `password`, grants ,`status` 
+        FROM users WHERE id = ?";
+        $req = $this->connexion->prepare($request);
+        $req->bindParam(1, $id, \PDO::PARAM_INT);
         $req->execute();
-
-        $user = $req->fetchAll(\PDO::FETCH_ASSOC);
-
+        $userTab = $req->fetch(\PDO::FETCH_ASSOC);
+        $user = User::hydrateUser($userTab);
         return $user;
     }
-=======
 
-    //afficher tous les utilisateurs
+    /**
+     * Méthode pour rechercher un User avec son id
+     * @param int $id id du User à chercher en BDD
+     * @return Entity|null retourne un Objet User(Entity) ou null
+     */
+    public function find(int $id): ?EntityInterface
+    {
+        $request = "SELECT id, firstname, lastname, email, `password`, grants AS `grant`, pseudo,
+        `status`, img_profile AS imgProfil
+        FROM users WHERE id = ?";
+        $req = $this->connexion->prepare($request);
+        $req->bindParam(1, $id, \PDO::PARAM_INT);
+        $req->execute();
+        $req->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, User::class);
+        $user = $req->fetch();
+        $user->setGrants($user->grant);
+        return $user;
+    }
 
->>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
-    //modifier un utilisateur
+    /**
+     * Méthode pour rechercher tous les User
+     * @return array<Entity> retourne un tableau avec tous les User
+     */
+    public function findAll(): array
+    {
+        $request = "SELECT id, firstname, lastname, email, pseudo, img_profile AS imgProfil, 
+        `password`, grants,`status` FROM users";
+        $req = $this->connexion->prepare($request);
+        $req->execute();
+        $userTab = $req->fetchAll(\PDO::FETCH_ASSOC);
+        $users = [];
+        foreach ($userTab as $key => $value) {
+            $users[] = User::hydrateUser($value);
+        }
+        return $users;
+    }
 
+    /**
+     * Méthode pour rechercher tous les User
+     * @return array<Entity> retourne un tableau avec tous les User
+     */
+    public function findAllV2(): array
+    {
+        $request = "SELECT id, firstname, lastname, email, `password`, grants AS `roles`, pseudo,
+        `status`, img_profile AS imgProfil FROM users";
+        $req = $this->connexion->prepare($request);
+        $req->execute();
+        $req->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, User::class);
+        $users = $req->fetchAll();
+        //Réassigner le tableau de roles grants
+        foreach ($users as $key => $value) {
+            $value->setGrants($value->roles);
+        }
+        return $users;
+    }
 
+    //verifier si l'utilisateur existe
+    public function ifUserExists(string $email): bool
+    {
+        $sql = "SELECT id FROM users WHERE email= ?";
+        $req = $this->connexion->prepare($sql);
+        //assigner les parametres
+        $req->bindParam(1, $email, \PDO::PARAM_STR);
+        //executer
+        $req->execute();
+
+        //test si le tableau est vide ou non
+        $data = $req->fetch(\PDO::FETCH_ASSOC);
+        if (!empty($data)) {
+            return true;
+        }
+        return false;
+    }
+    //Modifier un Utilisateur
 }

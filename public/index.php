@@ -1,64 +1,68 @@
 <?php
-include __DIR__."/../vendor/autoload.php";
 
+include __DIR__ . "../../vendor/autoload.php";
 
 $url = parse_url($_SERVER['REQUEST_URI']);
 
 $path = isset($url['path']) ? $url['path'] : '/';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/..");
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
 $dotenv->load();
 
-use App\Database\MySQL;
-$bdd= new MySQL();
-$bdd->connectBdd();
-//import des class
+//Import des classes
 use App\Controller\HomeController;
 use App\Controller\ErrorController;
-<<<<<<< HEAD
 use App\Repository\UserRepository;
-//créer des objets controller
+use App\Controller\SignInController;
+
+//Création object controller
+
 $homeController = new HomeController;
 $errorController = new ErrorController;
-$userRepository = new UserRepository;
-=======
-//créer des objets controller
-$homeController = new HomeController();
-$errorController = new ErrorController();
->>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
+$signInController = new SignInController;
+$userRepo = new UserRepository;
 
+//Router
 
 switch ($path) {
     case '/':
         $homeController->index();
-<<<<<<< HEAD
-        // dd($userRepository->find(1));
-        dd($userRepository->findAll());
-=======
->>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
         break;
 
     case '/login':
         echo "login";
         break;
+
+    case '/signup':
+        $signInController->addUser();
+        $signInController->signIn();
+        break;
+
     case '/logout':
-        echo "logout";
+        echo "Déconnexion";
         break;
-    case '/chocoblast/add';
-        echo "ajout d'un chocoblast";
+
+    case '/chocoblast/add':
+        echo "Ajout d'un chocoblast";
         break;
-    case '/chocoblast/all';
-        echo "afficher tous les chocoblasts";
+
+    case '/chocoblast/all':
+        echo "Afficher tous les chocoblast";
         break;
-    case '/chocoblast/id';
-        echo "affchage d'un chocoblast";
+
+    case '/chocoblast/id':
+        echo "Affichage d'un chocoblast par son ID";
         break;
-    case '/chocoblast/update/id';
-        echo "modifier le chocoblast par son ID";
+
+    case '/chocoblast/update/id':
+        echo "Modifier le chocoblast par son ID";
         break;
-    case '/chocoblast/delete/id';
-        echo "supprimer un chocoblast par son id";
+
+    case '/chocoblast/delete/id':
+        echo "Supprimer un chocoblast par son ID";
         break;
+
     default:
         $errorController->error404();
         break;

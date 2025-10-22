@@ -1,58 +1,67 @@
-<?php 
+<?php
 
 namespace App\Entity;
 
-<<<<<<< HEAD
-class User implements EntityInterface{
-=======
-class User{
->>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
-    private int $id;
-    private string $firstname;
-    private string $lastname;
+use App\Entity\EntityInterface;
+
+class User implements EntityInterface
+{
+    //Attributs
+    private ?int $id;
+    private ?string $lastname;
+    private ?string $firstname;
     private ?string $pseudo;
-    private string $email;
-    private string $password;
+    private ?string $email;
+    private ?string $password;
     private ?string $imgProfil;
     private ?array $grants;
     private ?bool $status;
 
-    //constructor
-    public function __construct(string $firstname, string $lastname, string $email, string $password)
-    {
+    //constructeur
+    public function __construct(
+        ?string $firstname = null,
+        ?string $lastname = null,
+        ?string $email = null,
+        ?string $password = null,
+    ) {
         $this->firstname = $firstname;
         $this->lastname = $lastname;
         $this->email = $email;
         $this->password = $password;
+        $this->pseudo = null;
+        $this->imgProfil = null;
+        $this->grants = [];
+        $this->status = true;
+        $this->id = null;
     }
 
-    //getters and setters
-    public function getId(): int
+    //Getters et Setters
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function setId(?int $id): void
     {
         $this->id = $id;
     }
-    
-    public function getFirstname(): string
+
+    public function getFirstname(): ?string
     {
         return $this->firstname;
     }
 
-    public function setFirstname(string $firstname): void
+    public function setFirstname(?string $firstname): void
     {
-        $this->firstname = $firstname;
+        $this->firstname;
     }
 
-    public function getLastname(): string
+    public function getLastname(): ?string
     {
         return $this->lastname;
     }
 
-    public function setLastname(string $lastname): void
+    public function setLastname(?string $lastname): void
     {
         $this->lastname = $lastname;
     }
@@ -72,7 +81,7 @@ class User{
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+    public function setEmail(?string $email): void
     {
         $this->email = $email;
     }
@@ -82,7 +91,7 @@ class User{
         return $this->password;
     }
 
-    public function setPassword(string $password): void
+    public function setPassword(?string $password): void
     {
         $this->password = $password;
     }
@@ -101,13 +110,24 @@ class User{
     {
         return $this->grants;
     }
-
-    public function setGrants(?array $grants): void
+    public function setGrants(?string $grants)
     {
+        $grants = explode(',', $grants);
         $this->grants = $grants;
     }
 
-    public function getStatus(): ?bool
+    public function addGrant(?string $grant): void
+    {
+        $this->grants[] = $grant;
+    }
+
+    public function removeGrant(?string $grant): void
+    {
+        unset($this->grants[array_search($grant, $this->grants)]);
+        sort($this->grants);
+    }
+
+    public function getStatus(): bool
     {
         return $this->status;
     }
@@ -117,15 +137,66 @@ class User{
         $this->status = $status;
     }
 
-    //methodes
-    public function hashPassword():void
+    //Méthodes
+    /**
+     * Méthode pour hasher le password
+     * @return void
+     */
+    public function hashPassword(): void
     {
         $this->password = password_hash($this->password, PASSWORD_DEFAULT);
     }
 
-    public function verifPassword(string $plainPassword): bool 
+    /**
+     * Méthode pour vérifier si le hash password est valide
+     * @param string $plainPassword mot de passe en clair
+     * @return bool true si valide false si invalide
+     */
+    public function verifPassword(string $plainPassword): bool
     {
         return password_verify($plainPassword, $this->password);
     }
 
+    /**
+     * Méthode pour hydrater un Objet User à partir d'un tableau de données
+     * @param array $userData (tableau de données d'un User)
+     * @return User retourne un Objet User
+     */
+    public static function hydrateUser(array $userData): User
+    {
+        $user = new User(
+            $userData["firstname"],
+            $userData["lastname"],
+            $userData["email"],
+            $userData["password"]
+        );
+
+        $user->setId($userData["id"]);
+        $user->setPseudo($userData["pseudo"]);
+        $user->setImgProfil($userData["imgProfil"]);
+        if (gettype($userData["grants"]) === "string") {
+            $userData["grants"] = explode(",", $userData["grants"]);
+        }
+        foreach ($userData["grants"] as $grant) {
+            $user->addGrant($grant);
+        }
+
+        $user->setStatus($userData["status"]);
+
+        return $user;
+    }
+
+    /**
+     * Méthode pour convertir un Objet User en tableau de données
+     * @return array retourne un tableau de données d'un User
+     */
+    public function toArray(): array
+    {
+        $userData =  [];
+        //Create an array from the object properties
+        foreach ($this as $key => $value) {
+            $userData[$key] = $value;
+        }
+        return $userData;
+    }
 }

@@ -1,1 +1,2 @@
-# projet_chocoblast
+# chocoblast
+Un projet chocoblast de formation
