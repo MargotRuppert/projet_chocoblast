@@ -8,7 +8,9 @@ $path = isset($url['path']) ? $url['path'] : '/';
 
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
+
 $dotenv->load();
+
 
 //Import des classes
 use App\Controller\HomeController;
