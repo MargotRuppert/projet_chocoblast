@@ -2,7 +2,11 @@
 
 namespace App\Entity;
 
+<<<<<<< HEAD
 class User implements EntityInterface{
+=======
+class User{
+>>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
     private int $id;
     private string $firstname;
     private string $lastname;

@@ -15,18 +15,27 @@ $bdd->connectBdd();
 //import des class
 use App\Controller\HomeController;
 use App\Controller\ErrorController;
+<<<<<<< HEAD
 use App\Repository\UserRepository;
 //créer des objets controller
 $homeController = new HomeController;
 $errorController = new ErrorController;
 $userRepository = new UserRepository;
+=======
+//créer des objets controller
+$homeController = new HomeController();
+$errorController = new ErrorController();
+>>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
 
 
 switch ($path) {
     case '/':
         $homeController->index();
+<<<<<<< HEAD
         // dd($userRepository->find(1));
         dd($userRepository->findAll());
+=======
+>>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
         break;
 
     case '/login':

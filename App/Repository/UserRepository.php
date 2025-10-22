@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+<<<<<<< HEAD
 use App\Entity\EntityInterface;
 use App\Repository\AbstractRepository;
 use App\Entity\User;
@@ -12,12 +13,29 @@ class UserRepository extends AbstractRepository
     public function __construct()
     {
         $this->setConnexion();
+=======
+use App\Database\MySQL;
+use App\Entity\User;
+
+class UserRepository
+{
+    private \PDO $connexion;
+
+    //constructeur
+    public function __construct()
+    {
+        $this->connexion = (new MySQL())->connectBdd();
+>>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
     }
 
     //ajouter un utilisateur
     public function saveUser(User $user): void
     {
+<<<<<<< HEAD
         $request = "INSERT INTO users(firstname, lastname, email, pseudo, password, img_profile, grants, `status`)
+=======
+        $request = "INSERT INTO users(firstname, lastname, email, pseudo, `password`, img_profil, grants, `status`)
+>>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
         VALUE(?,?,?,?,?,?,?,?)";
 
         $req = $this->connexion->prepare($request);
@@ -35,6 +53,7 @@ class UserRepository extends AbstractRepository
     
     }
     //afficher un utilisateur
+<<<<<<< HEAD
     public function find(int $id): ?EntityInterface{
         $sql = "SELECT firstname, lastname, email, pseudo,password, img_profile, grants, `status` FROM users WHERE id = ?";
         $req = $this->connexion->prepare($sql);
@@ -58,6 +77,11 @@ class UserRepository extends AbstractRepository
 
         return $user;
     }
+=======
+
+    //afficher tous les utilisateurs
+
+>>>>>>> f0990a67843346b2ee48b1ba83b7dfc8d5b18aaf
     //modifier un utilisateur
 
 
