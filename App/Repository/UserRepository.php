@@ -2,23 +2,22 @@
 
 namespace App\Repository;
 
-use App\Database\MySQL;
+use App\Entity\EntityInterface;
+use App\Repository\AbstractRepository;
 use App\Entity\User;
 
-class UserRepository
+class UserRepository extends AbstractRepository
 {
-    private \PDO $connexion;
-
     //constructeur
     public function __construct()
     {
-        $this->connexion = (new MySQL())->connectBdd();
+        $this->setConnexion();
     }
 
     //ajouter un utilisateur
     public function saveUser(User $user): void
     {
-        $request = "INSERT INTO users(firstname, lastname, email, pseudo, `password`, img_profil, grants, `status`)
+        $request = "INSERT INTO users(firstname, lastname, email, pseudo, password, img_profile, grants, `status`)
         VALUE(?,?,?,?,?,?,?,?)";
 
         $req = $this->connexion->prepare($request);
@@ -36,9 +35,29 @@ class UserRepository
     
     }
     //afficher un utilisateur
+    public function find(int $id): ?EntityInterface{
+        $sql = "SELECT firstname, lastname, email, pseudo,password, img_profile, grants, `status` FROM users WHERE id = ?";
+        $req = $this->connexion->prepare($sql);
+
+        $req->bindValue(1,$id, \PDO::PARAM_INT);
+        $req->execute();
+
+        $user = $req->fetch(\PDO::FETCH_ASSOC);
+
+        return new USER($user["firstname"], $user["lastname"], $user["email"], $user["password"]);
+    }
 
     //afficher tous les utilisateurs
+        public function findAll(): array{
+        $sql = "SELECT firstname, lastname, email, pseudo,`password`, img_profile, grants, `status` FROM users";
+        $req = $this->connexion->prepare($sql);
 
+        $req->execute();
+
+        $user = $req->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $user;
+    }
     //modifier un utilisateur
 
 
