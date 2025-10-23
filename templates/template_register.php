@@ -14,8 +14,9 @@
         <input type="text" name="lastname" placeholder="entrez un nom">
         <input type="email" name="email" placeholder="entrez un email">
         <input type="password" name="password" placeholder="entrez un mot de passe">
-        <input type="submit" value="ajouter" name="ajouter">
+        <input type="submit" value="submit" name="submit">
     </form>
+    <p><?= $data['message'] ?? ""?></p>
 </body>
 
 </html>

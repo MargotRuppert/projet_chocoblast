@@ -1,71 +1,41 @@
 <?php
 
+//Import de l'autoloader
 include __DIR__ . "../../vendor/autoload.php";
 
-$url = parse_url($_SERVER['REQUEST_URI']);
-
-$path = isset($url['path']) ? $url['path'] : '/';
-
-
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
-
+//Chargement des variables d'environnement
+$dotenv = Dotenv\Dotenv::createImmutable("../");
 $dotenv->load();
 
+/** Import des classes */
 
-//Import des classes
 use App\Controller\HomeController;
 use App\Controller\ErrorController;
-use App\Repository\UserRepository;
-use App\Controller\SignInController;
+use App\Controller\SecurityController;
 
-//Création object controller
+$errorController = new ErrorController();
 
-$homeController = new HomeController;
-$errorController = new ErrorController;
-$signInController = new SignInController;
-$userRepo = new UserRepository;
+/** Bloc Router */
 
-//Router
+use Mithridatem\Routing\Route;
+use Mithridatem\Routing\Router;
+use Mithridatem\Routing\Exception\RouterException;
 
-switch ($path) {
-    case '/':
-        $homeController->index();
-        break;
+//instance du router
+$router = new Router();
 
-    case '/login':
-        echo "login";
-        break;
+/** Ajouter les routes */
+$router->map(Route::controller('GET', '/', HomeController::class, 'index'));
+$router->map(Route::controller('GET', '/error', ErrorController::class, 'error403'));
+$router->map(Route::controller('GET', '/login', SecurityController::class, 'login'));
+$router->map(Route::controller('GET', '/login', SecurityController::class, 'login'));
+$router->map(Route::controller('POST', '/login', SecurityController::class, 'login'));
+$router->map(Route::controller('GET', '/logout', SecurityController::class, 'logout'));
+$router->map(Route::controller('GET', '/register', SecurityController::class, 'register'));
+$router->map(Route::controller('POST', '/register', SecurityController::class, 'register'));
 
-    case '/signup':
-        $signInController->addUser();
-        $signInController->signIn();
-        break;
-
-    case '/logout':
-        echo "Déconnexion";
-        break;
-
-    case '/chocoblast/add':
-        echo "Ajout d'un chocoblast";
-        break;
-
-    case '/chocoblast/all':
-        echo "Afficher tous les chocoblast";
-        break;
-
-    case '/chocoblast/id':
-        echo "Affichage d'un chocoblast par son ID";
-        break;
-
-    case '/chocoblast/update/id':
-        echo "Modifier le chocoblast par son ID";
-        break;
-
-    case '/chocoblast/delete/id':
-        echo "Supprimer un chocoblast par son ID";
-        break;
-
-    default:
-        $errorController->error404();
-        break;
+try {
+    $router->dispatch();
+} catch (RouterException $e) {
+    $errorController->error404();
 }
