@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Controller;
+
 use App\Controller\AbstractController;
 use App\Service\SecurityService;
+
 
 class SecurityController extends AbstractController
 {
@@ -13,24 +15,24 @@ class SecurityController extends AbstractController
         $this->securityService = new SecurityService();
     }
 
-    //Méthode login (se connecter)
-    public function login() {
+    //Méthode login
+    public function login()
+    {
         $this->securityService->connexion();
-        $this->render('','');
+        $this->render('', '');
     }
 
-    //Méthode logout (se déconnecter)
-    public function logout() {
-         $this->securityService->deconnexion();
-        $this->render('','');
-    }
+    //Méthode logout
+    public function logout() {}
 
-    //Méthode register (créer un compte User)
-    public function register() {
+    //Méthode  register
+    public function register()
+    {
         $data = [];
-        if($this->formSubmit($_POST)){
-           $data['message'] = $this->securityService->addUser();
+        if ($this->formSubmit($_POST)) {
+            $data["message"] = $this->securityService->addUser($_POST);
+            unset($_POST);
         }
-        $this->render('register','', $data);
+        $this->render('register', '', $data);
     }
 }

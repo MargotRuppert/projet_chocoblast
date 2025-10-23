@@ -10,48 +10,47 @@ class SecurityService
     private readonly UserRepository $userRepository;
     public function __construct()
     {
-        $this->userRepository = new UserRepository();
+        $this->userRepository = new UserRepository;
     }
 
-    //logique métier add user
-    public function addUser(): string{
-        //verifier si les champs sont vides
-            if (empty($_POST["firstname"]) || empty($_POST["lastname"]) || empty($_POST["email"]) || empty($_POST["password"])) {
-                return "Veuillez remplir les quatre champs.";
-            }
-            //verifier le format des données
-            if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
-                return "L'email n'est pas valide";
-            }
+    public function addUser(array $post): string
+    {        //verifier si les champs sont vides
+        if (empty($post["firstname"]) || empty($post["lastname"]) || empty($post["email"]) || empty($post["password"])) {
+            return "Veuillez remplir les quatre champs.";
+        }
+        //verifier le format des données
+        if (!filter_var($post["email"], FILTER_VALIDATE_EMAIL)) {
+            return "L'email n'est pas valide";
+        }
 
-            //verifier si le compte existe déjà ou non
-            if ($this->userRepository->ifUserExists($_POST["email"])) {
-                return "l'email n'est pas utilisable";
-            }
+        //verifier si le compte existe déjà ou non
+        if ($this->userRepository->ifUserExists($post["email"])) {
+            return "l'email n'est pas utilisable";
+        }
 
-            //sanitize les données
-            function sanitize(string $value): string
-            {
-                return htmlspecialchars(strip_tags(trim($value)), ENT_NOQUOTES);
-            }
+        //sanitize les données
+        function sanitize(string $value): string
+        {
+            return htmlspecialchars(strip_tags(trim($value)), ENT_NOQUOTES);
+        }
 
-            //hasher le mdp
-            $_POST["password"] = password_hash($_POST["password"], PASSWORD_DEFAULT);
+        //hasher le mdp
+        $post["password"] = password_hash($post["password"], PASSWORD_DEFAULT);
 
-            $user = new User($_POST["firstname"], $_POST["lastname"], $_POST["email"], $_POST["password"]);
-            //ajout en BDD
-            $this->userRepository->saveUser($user);
-            return "Utilisateur bien ajouté en BDD";
+        $post["id"] = null;
+        $post["imgProfil"] = "default.png";
+        $post["pseudo"] = null;
+        $post["grants"] = "ROLE_USER";
+        $post["status"] = 1;
 
+        $user = new User();
+        //ajout en BDD
+        $this->userRepository->saveUser($user->hydrateUser($post));
+
+        return "Utilisateur bien ajouté à la BDD";
     }
 
-    //logique métier connexion
-    public function connexion(){
+    public function connexion() {}
 
-    }
-
-    //logique métier deconnexion
-    public function deconnexion(){
-
-    }
+    public function deconnexion() {}
 }

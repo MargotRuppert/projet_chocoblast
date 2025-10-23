@@ -9,7 +9,7 @@
 
 <body>
     <h1>Ajouter un utilisateur</h1>
-    <form action="" method="POST">
+    <form action="/register" method="POST">
         <input type="text" name="firstname" placeholder="entrez un prénom">
         <input type="text" name="lastname" placeholder="entrez un nom">
         <input type="email" name="email" placeholder="entrez un email">
