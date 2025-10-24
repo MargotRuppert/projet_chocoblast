@@ -1,5 +1,5 @@
 {
-    "name": "maximecloarec/chocoblast",
+    "name": "mithridatem/chocoblast",
     "description": "Projet de cours sur le théme chocoblast",
     "type": "project",
     "license": "MIT",
@@ -10,8 +10,8 @@
     },
     "authors": [
         {
-            "name": "maxime",
-            "email": "franchementJeSaisPas@adrar-formation.com"
+            "name": "mithridatem",
+            "email": "mathieumithridate@adrar-formation.com"
         }
     ],
     "minimum-stability": "dev",
@@ -20,6 +20,7 @@
     },
     "require": {
         "vlucas/phpdotenv": "^5.6@dev",
-        "mithridatem/router": "dev-main"
+        "mithridatem/router": "dev-main",
+        "mithridatem/validation": "dev-main"
     }
 }

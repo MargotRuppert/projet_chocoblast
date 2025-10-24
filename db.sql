@@ -1,9 +1,5 @@
--- Création de la Base de données
-CREATE DATABASE chocoblast CHARSET utf8mb4;
-USE chocoblast;
-
--- Création des tables
-CREATE TABLE users(
+-- Création des tables (la base de données est créée automatiquement par Docker)
+CREATE TABLE IF NOT EXISTS users(
 id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 firstname VARCHAR(50) NOT NULL,
 lastname VARCHAR(50) NOT NULL,
@@ -15,7 +11,7 @@ img_profile VARCHAR(255) DEFAULT "profil.png",
 `status` BOOL DEFAULT true
 )ENGINE=InnoDB;
 
-CREATE TABLE chocoblast(
+CREATE TABLE IF NOT EXISTS chocoblast(
 id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 slogan VARCHAR(50) NOT NULL,
 content VARCHAR(255) NOT NULL,
@@ -28,14 +24,14 @@ id_target INT NOT NULL,
 id_blaster INT NOT NULL 
 )ENGINE=InnoDB;
 
-CREATE TABLE note(
+CREATE TABLE IF NOT EXISTS note(
 id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 note INT NOT NULL,
 id_chocoblast INT NOT NULL,
 id_user INT NOT NULL
 )ENGINE=InnoDB;
 
-CREATE TABLE commentary(
+CREATE TABLE IF NOT EXISTS commentary(
 id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 content VARCHAR(255) NOT NULL,
 created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,

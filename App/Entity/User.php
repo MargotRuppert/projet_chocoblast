@@ -2,22 +2,32 @@
 
 namespace App\Entity;
 
-use App\Entity\EntityInterface;
+use App\Entity\Entity;
+use Mithridatem\Validation\Attributes\Email;
+use Mithridatem\Validation\Attributes\NotBlank;
+use Mithridatem\Validation\Attributes\Pattern;
 
-class User implements EntityInterface
+class User extends Entity
 {
-    //Attributs
+    /** Bloc attributs  **/
     private ?int $id;
+    #[NotBlank]
     private ?string $lastname;
+    #[NotBlank]
     private ?string $firstname;
+    #[NotBlank]
     private ?string $pseudo;
+    #[NotBlank]
+    #[Email]
     private ?string $email;
+    #[NotBlank]
     private ?string $password;
     private ?string $imgProfil;
     private ?array $grants;
     private ?bool $status;
 
-    //constructeur
+    /** Bloc constructeur   **/
+
     public function __construct(
         ?string $firstname = null,
         ?string $lastname = null,
@@ -29,13 +39,13 @@ class User implements EntityInterface
         $this->email = $email;
         $this->password = $password;
         $this->pseudo = null;
-        $this->imgProfil = null;
         $this->grants = [];
-        $this->status = true;
+        $this->status = null;
         $this->id = null;
     }
 
-    //Getters et Setters
+    /** Bloc Getters et Setters   **/
+
     public function getId(): ?int
     {
         return $this->id;
@@ -106,27 +116,6 @@ class User implements EntityInterface
         $this->imgProfil = $imgProfil;
     }
 
-    public function getGrants(): ?array
-    {
-        return $this->grants;
-    }
-    public function setGrants(?string $grants)
-    {
-        $grants = explode(',', $grants);
-        $this->grants = $grants;
-    }
-
-    public function addGrant(?string $grant): void
-    {
-        $this->grants[] = $grant;
-    }
-
-    public function removeGrant(?string $grant): void
-    {
-        unset($this->grants[array_search($grant, $this->grants)]);
-        sort($this->grants);
-    }
-
     public function getStatus(): bool
     {
         return $this->status;
@@ -137,7 +126,48 @@ class User implements EntityInterface
         $this->status = $status;
     }
 
-    //Méthodes
+    /** Bloc gestion des grants   **/
+    /**
+     * Méthode pour récupérer les grants
+     * @return array|null retourne la liste des grants
+     */
+    public function getGrants(): ?array
+    {
+        return $this->grants;
+    }
+
+    /**
+     * Méthode pour hydrater les grants
+     * @param string $grants liste des grants séparés par des virgules
+     * @return void 
+     */
+    public function setGrants(?string $grants)
+    {
+        $grants = explode(',', $grants);
+        $this->grants = $grants;
+    }
+    /**
+     * Méthode pour ajouter un grant
+     * @param string $grant le grant à ajouter
+     * @return void
+     */
+    public function addGrant(?string $grant): void
+    {
+        $this->grants[] = $grant;
+    }
+
+    /**
+     * Méthode pour supprimer un grant
+     * @param string $grant le grant à supprimer
+     * @return void
+     */
+    public function removeGrant(?string $grant): void
+    {
+        unset($this->grants[array_search($grant, $this->grants)]);
+        sort($this->grants);
+    }
+
+    /** Bloc méthodes   **/
     /**
      * Méthode pour hasher le password
      * @return void
@@ -165,23 +195,21 @@ class User implements EntityInterface
     public static function hydrateUser(array $userData): User
     {
         $user = new User(
-            $userData["firstname"],
-            $userData["lastname"],
-            $userData["email"],
-            $userData["password"]
+            $userData["firstname"] ?? null,
+            $userData["lastname"] ?? null,
+            $userData["email"] ?? null,
+            $userData["password"] ?? null
         );
 
-        $user->setId($userData["id"]);
-        $user->setPseudo($userData["pseudo"]);
-        $user->setImgProfil($userData["imgProfil"]);
-        if (gettype($userData["grants"]) === "string") {
-            $userData["grants"] = explode(",", $userData["grants"]);
-        }
-        foreach ($userData["grants"] as $grant) {
-            $user->addGrant($grant);
+        $user->setId($userData["id"] ?? null);
+        $user->setPseudo($userData["pseudo"] ?? "");
+        $user->setImgProfil($userData["imgProfil"] ?? "");
+
+        if (isset($userData["grants"]) && gettype($userData["grants"]) === "string") {
+            $user->setGrants($userData["grants"]);
         }
 
-        $user->setStatus($userData["status"]);
+        $user->setStatus($userData["status"] ?? false);
 
         return $user;
     }
@@ -193,8 +221,11 @@ class User implements EntityInterface
     public function toArray(): array
     {
         $userData =  [];
-        //Create an array from the object properties
+        //Crée un tableau de données à partir des attributs de l'objet User
         foreach ($this as $key => $value) {
+            if ($key === 'grants' && is_array($value)) {
+                $value = implode(',', $value);
+            }
             $userData[$key] = $value;
         }
         return $userData;

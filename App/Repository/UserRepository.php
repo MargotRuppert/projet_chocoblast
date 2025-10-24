@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Entity;
-use App\Entity\EntityInterface;
 use App\Repository\AbstractRepository;
 use App\Entity\User;
 
@@ -11,7 +10,7 @@ use App\Entity\User;
 class UserRepository extends AbstractRepository
 {
     //Constructeur
-    public function __construct()
+    public function __construct() 
     {
         $this->setConnexion();
     }
@@ -46,7 +45,7 @@ class UserRepository extends AbstractRepository
      * @param int $id id du User à chercher en BDD
      * @return Entity|null retourne un Objet User(Entity) ou null
      */
-    public function findV2(int $id): ?EntityInterface
+    public function findV2(int $id): ?Entity
     {
         $request = "SELECT id, firstname, lastname, email, pseudo, img_profile AS imgProfil, `password`, grants ,`status` 
         FROM users WHERE id = ?";
@@ -63,7 +62,7 @@ class UserRepository extends AbstractRepository
      * @param int $id id du User à chercher en BDD
      * @return Entity|null retourne un Objet User(Entity) ou null
      */
-    public function find(int $id): ?EntityInterface
+    public function find(int $id): ?Entity
     {
         $request = "SELECT id, firstname, lastname, email, `password`, grants AS `grant`, pseudo,
         `status`, img_profile AS imgProfil
@@ -90,7 +89,7 @@ class UserRepository extends AbstractRepository
         $userTab = $req->fetchAll(\PDO::FETCH_ASSOC);
         $users = [];
         foreach ($userTab as $key => $value) {
-            $users[] = User::hydrateUser($value);
+           $users[] = User::hydrateUser($value);
         }
         return $users;
     }
@@ -114,23 +113,32 @@ class UserRepository extends AbstractRepository
         return $users;
     }
 
-    //verifier si l'utilisateur existe
-    public function ifUserExists(string $email): bool
+    public function isUserExistWithEmail(string $email): bool 
     {
-        $sql = "SELECT id FROM users WHERE email= ?";
-        $req = $this->connexion->prepare($sql);
-        //assigner les parametres
+        $request = "SELECT u.id FROM users AS u WHERE email = ?";
+        $req = $this->connexion->prepare($request);
         $req->bindParam(1, $email, \PDO::PARAM_STR);
-        //executer
         $req->execute();
-
-        //test si le tableau est vide ou non
-        $data = $req->fetch(\PDO::FETCH_ASSOC);
-        if (!empty($data)) {
-            return true;
-        }
-        return false;
+        
+        //Test si le compte n'existe pas
+        return $req->fetch(\PDO::FETCH_ASSOC);
     }
-    
-    //methode création user 
+    //Modifier un Utilisateur
+    public function findUserByEmail(string $email): ?Entity
+    {
+        $request = "SELECT u.id, u.firstname, u.lastname, u.email, u.password, u.img_profile AS imgProfil,
+        u.grants, u.pseudo, u.status  FROM users AS u WHERE u.email = ?";
+        $req = $this->connexion->prepare($request);
+        $req->bindParam(1, $email, \PDO::PARAM_STR);
+        $req->execute();
+        $userTab = $req->fetch(\PDO::FETCH_ASSOC);
+        //Test si l'utilisateur n'existe pas
+        if (!$userTab) {
+            return null;
+        }
+        //hydrater le tableau
+        $user = User::hydrateUser($userTab);
+        
+        return $user;
+    }
 }

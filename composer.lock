@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "99482e1986b5f905e565e85748ba89b7",
+    "content-hash": "d0f1e84f4861b2fe362e47bb6dabc9f1",
     "packages": [
         {
             "name": "graham-campbell/result-type",
@@ -117,6 +117,50 @@
                 "source": "https://github.com/evaluationWeb/router-librairie"
             },
             "time": "2025-10-04T13:45:23+00:00"
+        },
+        {
+            "name": "mithridatem/validation",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/evaluationWeb/validation-librairie.git",
+                "reference": "a9fde1b3cb4c3ef7b53e6735d08b8b5bd8740774"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/evaluationWeb/validation-librairie/zipball/a9fde1b3cb4c3ef7b53e6735d08b8b5bd8740774",
+                "reference": "a9fde1b3cb4c3ef7b53e6735d08b8b5bd8740774",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^11.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mithridatem\\Validation\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mathieu Mithridate",
+                    "email": "mathieumithridate@adrar-formation.com"
+                }
+            ],
+            "description": "Attribute-based validation components",
+            "support": {
+                "issues": "https://github.com/evaluationWeb/validation-librairie/issues",
+                "source": "https://github.com/evaluationWeb/validation-librairie/tree/main"
+            },
+            "time": "2025-10-20T17:09:15+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -700,6 +744,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "mithridatem/router": 20,
+        "mithridatem/validation": 20,
         "symfony/var-dumper": 20,
         "vlucas/phpdotenv": 20
     },

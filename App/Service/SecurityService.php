@@ -4,53 +4,117 @@ namespace App\Service;
 
 use App\Repository\UserRepository;
 use App\Entity\User;
+use Mithridatem\Validation\Validator;
+use Mithridatem\Validation\Exception\ValidationException;
+use App\Utils\StringTools;
 
 class SecurityService
 {
     private readonly UserRepository $userRepository;
+    private readonly Validator $validator;
+
     public function __construct()
     {
-        $this->userRepository = new UserRepository;
+        $this->userRepository = new UserRepository();
+        $this->validator = new Validator();
     }
 
-    public function addUser(array $post): string
-    {        //verifier si les champs sont vides
-        if (empty($post["firstname"]) || empty($post["lastname"]) || empty($post["email"]) || empty($post["password"])) {
-            return "Veuillez remplir les quatre champs.";
-        }
-        //verifier le format des données
-        if (!filter_var($post["email"], FILTER_VALIDATE_EMAIL)) {
-            return "L'email n'est pas valide";
-        }
+    //Logique métier de la création de compte
+    public function addUser(array $user): string
+    {
 
-        //verifier si le compte existe déjà ou non
-        if ($this->userRepository->ifUserExists($post["email"])) {
-            return "l'email n'est pas utilisable";
+        //Test si les mots de passe sont identiques
+        if ($user["password"] != $user["verif_password"]) {
+            return "Les mots de passe ne sont pas identiques";
         }
 
-        //sanitize les données
-        function sanitize(string $value): string
-        {
-            return htmlspecialchars(strip_tags(trim($value)), ENT_NOQUOTES);
+        //Nettoyer les entrées
+        $user = StringTools::sanitize_array($user);
+
+        //Test si l'utilisateur existe 
+        if ($this->userRepository->isUserExistWithEmail($user["email"])) {
+            return "Les informations email / password sont incompatibles avec l'ajout d'un compte";
         }
 
-        //hasher le mdp
-        $post["password"] = password_hash($post["password"], PASSWORD_DEFAULT);
+        //Assigner les valeurs par défault
+        $user["imgProfil"] = "profil.png";
+        $user["status"] = true;
+        $user["grants"] = "ROLE_USER";
 
-        $post["id"] = null;
-        $post["imgProfil"] = "default.png";
-        $post["pseudo"] = null;
-        $post["grants"] = "ROLE_USER";
-        $post["status"] = 1;
+        //Hydratation en User
+        $newUser = User::hydrateUser($user);
 
-        $user = new User();
-        //ajout en BDD
-        $this->userRepository->saveUser($user->hydrateUser($post));
+        try {
+            $this->validator->validate($newUser);
+        } catch (ValidationException $e) {
+            return $e->getMessage();
+        }
 
-        return "Utilisateur bien ajouté à la BDD";
+        //Hash du password
+        $newUser->hashPassword();
+
+        try {
+            //code//Save en BDD du User
+            $this->userRepository->saveUser($newUser);
+        } catch (\PDOException $ex) {
+            return "Erreur d'enregistrement";
+        }
+
+        return "Le compte " . $newUser->getEmail() . " a été ajouté en BDD";
     }
 
-    public function connexion() {}
+    //Logique métier de la connexion
+    public function connexion(array $post): string
+    {
+        //Nettoyer
+        $user = StringTools::sanitize_array($post);
 
-    public function deconnexion() {}
+        //Récupére l'objet User
+        $user = $this->userRepository->findUserByEmail($post["email"]);
+        
+        //Si le compte n'existe pas
+        if (!isset($user)) {
+            return "Les informations de connexion email et ou password sont invalides";
+        }
+        
+        //test si les champs sont valides
+        try {
+            $this->validator->validate($user);
+        } catch (ValidationException $e) {
+            return $e->getMessage();
+        }
+
+        //Test si le password est correct
+        if ($user instanceof User && $user->verifPassword($post["password"])) {
+            $this->onAuthentificationSuccess($user);
+            return "Connecté";
+        }
+
+        $this->onAuthentificationFailed();
+        
+        return "Les informations de connexion email et ou password ne sont pas correctes";
+    }
+    
+    private function onAuthentificationSuccess(User $user): void 
+    {
+        //Création des super globales de session
+        $_SESSION["email"] = $user->getEmail();
+        $_SESSION["firstname"] = $user->getFirstname();
+        $_SESSION["lastname"] = $user->getLastname();
+        $_SESSION["imgProfil"] = $user->getImgProfil();
+        $_SESSION["grants"] = $user->getGrants();
+        header("Refresh:2; url=/");
+    }
+
+    private function onAuthentificationFailed(): void
+    {
+        session_destroy();
+        header("Refresh:3; url=/login");
+    }
+
+    //Logique métier de la déconnexion
+    public function deconnexion() {
+        session_destroy();
+        header("Location:/");
+    }
 }
